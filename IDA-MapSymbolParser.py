@@ -28,9 +28,38 @@ def rename_symbols_from_map():
             # Use idaapi.set_name to rename the corresponding address, ensuring the address is valid
             if idc.get_segm_name(rva_base) is not None:
                 idaapi.set_name(rva_base, name, idaapi.SN_NOWARN)
-        print(f"Processed {len(extracted_data)} symbols.")
+        print(f"[ParseMap] Processed {len(extracted_data)} symbols.")
     else:
-        print("No .map file selected.")
+        print("[ParseMap] No .map file selected.")
 
-rename_symbols_from_map()
+class ParseMapPlugin(idaapi.plugin_t):
+    flags = 0
+    comment = 'Parse MAP file'
+    help = 'Parse MAP file'
+    wanted_name = 'Parse MAP file'
+    wanted_hotkey = ''
 
+    def init(self):
+        return idaapi.PLUGIN_OK
+
+    def run(self, arg):
+        rename_symbols_from_map()
+
+    def term(self):
+        pass
+
+def PLUGIN_ENTRY():
+    try:
+        return ParseMapPlugin()
+
+    except Exception as err:
+        import traceback
+        print('[ParseMap] Error: %s\n%s' % str((err), traceback.format_exc()))
+        raise
+
+# run as script
+def main():
+    rename_symbols_from_map()
+
+if __name__ == '__main__':
+    main()
